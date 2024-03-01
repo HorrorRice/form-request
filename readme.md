@@ -28,15 +28,36 @@ $app->register(\Anik\Form\FormRequestServiceProvider::class);
 - You can override `authorize` method to define the authorization logic if the client is authorized to submit the form.
   Must return a boolean value. Default is `true`. When returning `false`, it'll
   raise `\Illuminate\Auth\Access\AuthorizationException` exception.
-- If the validation fails, it will throw `Illuminate\Validation\ValidationException`.
-    - By default, it returns response in `{"message": "The given data was invalid.", "errors": []}` format with status
-      code `422`. Handle the exception in `app/Exceptions/Handler.php`'s `render` method if you want to modify the
-      response.
-    - Override the `statusCode` method to return the status of your choice. Must return `int`. Default is `422`.
-    - Override the `errorMessage` method to return the message of your choice. Must return `string`. Default
-      is `The given data was invalid.`
-    - Override the `errorResponse` method to return response of your choice when the validation fails. Must return
-      either of type `\Symfony\Component\HttpFoundation\Response` or `null`.
+  - If the validation fails, it will throw `Illuminate\Validation\ValidationException`.
+      - By default, with rules and invalidated request: 
+        ```php
+            [
+               'name' => ['required'],
+               'age' => ['required', 'numeric']
+            ]
+        ``` 
+        It returns response in format with status
+        code `422`, and dynamically generated error message summary from the validation errors.
+        ```json
+             {
+                "message": "The name field is required. (and 1 more error)",
+                "errors": {
+                    "name": [
+                        "The name field is required."
+                    ],
+                    "age": [
+                        "The age field is required."
+                    ]
+                }
+            }
+        ```
+        Handle the exception in `app/Exceptions/Handler.php`'s `render` method if you want to modify the
+        response.
+      - Override the `statusCode` method to return the status of your choice. Must return `int`. Default is `422`.
+      - Override the `errorMessage` method to return the message of your choice. Must return `string`. Default
+        is either dynamically generated like the one above or `The given data was invalid.` as a fallback.
+      - Override the `errorResponse` method to return response of your choice when the validation fails. Must return
+        either of type `\Symfony\Component\HttpFoundation\Response` or `null`.
 - Now you can inject your **Request** class through the method injections. All the methods
   of `Laravel\Lumen\Http\Request` class is available in your request class.
 - The `FormRequest::validated()` method will return the validated data when the validation passes.

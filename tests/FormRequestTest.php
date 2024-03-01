@@ -45,6 +45,10 @@ class FormRequestTest extends TestCase
         $response = $this->post('form-request')->seeStatusCode(422)->response->getData(true);
         $this->assertIsString($response['message']);
         $this->assertIsArray($response['errors']);
+
+        $this->assertSame('The name field is required. (and 1 more error)', $response['message']);
+        $this->assertSame('The name field is required.', $response['errors']['name']['0']);
+        $this->assertSame('The age field is required.', $response['errors']['age']['0']);
     }
 
     public function testValidationExceptionWithMessageAndStatusCode()

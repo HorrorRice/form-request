@@ -23,7 +23,8 @@ abstract class FormRequest extends Request
 
     protected function errorMessage(): string
     {
-        return 'The given data was invalid.';
+        return (($this->validator) && $this->validator->fails()) ? (new ValidationException($this->validator))->getMessage()
+            : 'The given data was invalid.';
     }
 
     protected function statusCode(): int
@@ -68,7 +69,7 @@ abstract class FormRequest extends Request
         $this->prepareForValidation();
 
         $this->validator = $this->app->make('validator')
-                                     ->make($this->all(), $this->rules(), $this->messages(), $this->attributes());
+            ->make($this->all(), $this->rules(), $this->messages(), $this->attributes());
 
         if ($this->validator->fails()) {
             $this->validationFailed();
